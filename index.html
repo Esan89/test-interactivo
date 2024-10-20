@@ -11,7 +11,6 @@
             padding: 0;
             background-color: #f4f4f9;
             display: flex;
-            height: 100vh;
             flex-direction: column;
         }
 
@@ -20,7 +19,7 @@
             color: white;
             padding: 10px 0;
             text-align: center;
-            font-size: 1.2rem; /* Reducido tamaño de letra del título */
+            font-size: 1.5rem;
             flex-shrink: 0;
         }
 
@@ -28,30 +27,17 @@
             display: flex;
             flex-grow: 1;
             justify-content: center;
-            align-items: flex-start; /* Alineado al inicio */
-        }
-
-        .content {
-            margin-left: 250px;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start; /* Alineado al inicio */
-            width: 100%;
-            height: 100%; /* Aumentar la altura del contenido */
+            align-items: flex-start; /* Cambia para ajustar la alineación vertical */
+            padding: 20px; /* Añadir un poco de espacio en los lados */
+            flex-wrap: wrap; /* Permite que los elementos se ajusten en múltiples líneas en pantallas más pequeñas */
         }
 
         .sidebar {
-            width: 250px;
+            width: 100%; /* Cambiar a 100% para dispositivos pequeños */
             background-color: #2c3e50;
             color: white;
             padding: 20px;
-            text-align: center;
             box-sizing: border-box;
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100%;
         }
 
         .sidebar h2 {
@@ -92,9 +78,8 @@
         /* Estilo para las preguntas y respuestas */
         .question-title {
             display: inline-block;
-            font-size: 1.5rem; /* Reducido tamaño de letra */
+            font-size: 2rem; /* Aumentar tamaño de letra */
             font-weight: bold; /* Texto en negrita */
-            margin-bottom: 20px; /* Espacio inferior */
         }
 
         /* Contenedor de ajuste de tamaño de fuente */
@@ -103,21 +88,14 @@
             text-align: center;
         }
 
-        .options {
-            margin-top: 20px;
-            width: 100%; /* Ancho completo */
-            counter-reset: optionCounter; /* Reiniciar el contador aquí */
-        }
-
         .options label {
             display: block;
             text-align: left;
-            margin-bottom: 2px; /* Reducir separación entre respuestas */
+            margin: 5px 0; /* Reducir el margen entre las opciones */
             font-size: 1.5rem; /* Aumentar tamaño de letra */
             font-weight: bold; /* Texto en negrita */
             border-radius: 10px; /* Bordes redondeados */
-            padding: 5px; /* Espacio interno reducido */
-            transition: background-color 0.3s; /* Transición suave para el fondo */
+            padding: 5px; /* Espacio interno */
         }
 
         .options label.correct {
@@ -131,9 +109,14 @@
         }
 
         .options label:before {
-            content: counter(optionCounter, lower-alpha) '. '; /* Diferentes incisos */
+            content: counter(optionCounter, lower-alpha) '. ';
             counter-increment: optionCounter;
             margin-right: 5px;
+        }
+
+        .options {
+            counter-reset: optionCounter;
+            margin-top: 20px;
         }
 
         /* Estilo para las estadísticas en el menú lateral */
@@ -158,10 +141,10 @@
 
         .modal-content {
             background-color: #fefefe;
-            margin: 15% auto; /* Menos margen */
+            margin: 10% auto; /* Menos margen */
             padding: 20px;
             border: 1px solid #888;
-            width: 40%; /* Ventana modal más pequeña */
+            width: 50%; /* Ventana modal más pequeña */
             text-align: center;
             border-radius: 10px; /* Bordes redondeados */
         }
@@ -197,6 +180,25 @@
             background-color: #2c3e50;
             color: white;
         }
+
+        /* Ajustes para pantallas pequeñas */
+        @media (max-width: 768px) {
+            .question-title {
+                font-size: 1.5rem; /* Ajustar el tamaño del título */
+            }
+
+            .options label {
+                font-size: 1rem; /* Ajustar el tamaño de las opciones */
+            }
+
+            .sidebar {
+                padding: 10px;
+            }
+
+            footer {
+                padding: 5px 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -214,6 +216,7 @@
             Cargar
         </label>
 
+        <!-- Estadísticas en el menú lateral -->
         <div class="stats">
             <p id="totalPreguntas">Total de preguntas: 0</p>
             <p id="preguntasRespondidas">Preguntas respondidas: 0 de 0</p>
@@ -221,6 +224,7 @@
             <p id="incorrectas">Respuestas incorrectas: 0</p>
         </div>
 
+        <!-- Control de tamaño de letra -->
         <div class="font-size-container">
             <label for="fontSize">Tamaño de letra:</label>
             <input type="range" id="fontSize" min="12" max="32" value="16">
@@ -230,10 +234,11 @@
     <div class="content">
         <section id="cargar">
             <div class="question-container">
-                <p class="question-title" id="questionText"></p>
+                <p id="questionNumber"></p><p class="question-title" id="questionText"></p>
 
                 <div class="options" id="optionsContainer"></div>
 
+                <!-- Botón para alternar entre pantalla completa y normal -->
                 <button id="fullscreenBtn" onclick="toggleFullscreen()">⇱</button>
             </div>
         </section>
@@ -244,6 +249,7 @@
     Test Interactivo - Todos los derechos reservados © 2024
 </footer>
 
+<!-- Ventana modal para resultados -->
 <div id="resultModal" class="modal">
     <div class="modal-content">
         <span class="close" id="closeModal">&times;</span>
@@ -273,161 +279,137 @@
     const fontSizeSlider = document.getElementById('fontSize');
     const questionContainer = document.querySelector('.question-container');
 
+    // Elementos de estadísticas en el menú lateral
     const totalPreguntasEl = document.getElementById('totalPreguntas');
     const preguntasRespondidasEl = document.getElementById('preguntasRespondidas');
     const correctasEl = document.getElementById('correctas');
     const incorrectasEl = document.getElementById('incorrectas');
 
+    // Archivos de sonido
     const correctSound = new Audio('correct-sound.mp3');
     const incorrectSound = new Audio('incorrect-sound.mp3');
 
+    // Ventana modal
     const resultModal = document.getElementById('resultModal');
     const resultadoTexto = document.getElementById('resultadoTexto');
     const closeModal = document.getElementById('closeModal');
     const restartBtn = document.getElementById('restartBtn');
 
+    // Función para cargar preguntas desde el archivo Excel
     inputFile.addEventListener('change', function(event) {
-        const archivo = event.target.files[0];
+        const file = event.target.files[0];
         const reader = new FileReader();
-        reader.onload = function(event) {
-            const data = new Uint8Array(event.target.result);
+        
+        reader.onload = function(e) {
+            const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, {type: 'array'});
-            const sheetName = workbook.SheetNames[0];
-            const sheet = workbook.Sheets[sheetName];
 
-            // Mostrar el título del Excel (segunda columna, primera fila)
-            const tituloExcel = sheet['B1'] ? sheet['B1'].v : 'Título no encontrado';
-            pageTitle.textContent = tituloExcel;
-
-            // Procesar preguntas a partir de la tercera fila
-            const preguntasExcel = XLSX.utils.sheet_to_json(sheet, {header: 1});
-            preguntas = preguntasExcel.slice(2).map((fila, index) => ({
-                numero: index + 1,
-                pregunta: fila[0],
-                opciones: [fila[1], fila[2], fila[3], fila[4]].filter(Boolean).sort(() => Math.random() - 0.5),
-                respuestaCorrecta: fila[5]
-            }));
-
-            // Verificar si se han cargado las preguntas
-            console.log("Preguntas cargadas:", preguntas);
-
-            totalPreguntasEl.textContent = `Total de preguntas: ${preguntas.length}`;
-            preguntasRespondidasEl.textContent = `Preguntas respondidas: 0 de ${preguntas.length}`;
-
-            // Comprobar si hay preguntas antes de mostrar
-            if (preguntas.length > 0) {
-                mostrarPregunta();
-            } else {
-                alert("No se encontraron preguntas en el archivo.");
-            }
+            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+            preguntas = XLSX.utils.sheet_to_json(firstSheet, {header: 1});
+            
+            // Iniciar el test
+            currentQuestionIndex = 0;
+            correctas = 0;
+            incorrectas = 0;
+            updateStats();
+            showQuestion();
         };
-        reader.readAsArrayBuffer(archivo);
+        
+        reader.readAsArrayBuffer(file);
     });
 
-    function mostrarPregunta() {
-        if (preguntas.length === 0) return; // Verificar si hay preguntas
+    // Función para mostrar una pregunta
+    function showQuestion() {
+        if (currentQuestionIndex < preguntas.length) {
+            const preguntaActual = preguntas[currentQuestionIndex];
+            document.getElementById('questionNumber').innerText = `Pregunta ${currentQuestionIndex + 1}`;
+            document.getElementById('questionText').innerText = preguntaActual[0];
 
-        const preguntaActual = preguntas[currentQuestionIndex];
-        correctAnswer = preguntaActual.respuestaCorrecta;
+            // Opciones aleatorias
+            const opciones = preguntaActual.slice(1, 5); // Columnas 2 a 5
+            correctAnswer = preguntaActual[5]; // Columna de respuesta correcta
 
-        document.getElementById('questionText').textContent = preguntaActual.pregunta;
+            // Barajar las opciones
+            opciones.sort(() => Math.random() - 0.5);
+            const optionsContainer = document.getElementById('optionsContainer');
+            optionsContainer.innerHTML = ''; // Limpiar opciones anteriores
 
-        const optionsContainer = document.getElementById('optionsContainer');
-        optionsContainer.innerHTML = '';
+            opciones.forEach(opcion => {
+                const label = document.createElement('label');
+                label.innerHTML = `<input type="radio" name="option" value="${opcion}" onclick="checkAnswer('${opcion}')"> ${opcion}`;
+                optionsContainer.appendChild(label);
+            });
 
-        preguntaActual.opciones.forEach(opcion => {
-            const optionElement = document.createElement('label');
-            optionElement.innerHTML = `<input type="radio" name="option" value="${opcion}"> ${opcion}`;
-            optionElement.addEventListener('change', verificarRespuesta);
-            optionsContainer.appendChild(optionElement);
-        });
+            totalPreguntasEl.innerText = `Total de preguntas: ${preguntas.length}`;
+            preguntasRespondidasEl.innerText = `Preguntas respondidas: ${currentQuestionIndex} de ${preguntas.length}`;
+            correctasEl.innerText = `Respuestas correctas: ${correctas}`;
+            incorrectasEl.innerText = `Respuestas incorrectas: ${incorrectas}`;
+        } else {
+            showResults();
+        }
     }
 
-    function verificarRespuesta(event) {
-        const selectedOption = event.target.value;
-        const selectedLabel = event.target.parentElement;
-
-        // Agregar clase correcta o incorrecta
-        if (selectedOption === correctAnswer) {
-            selectedLabel.classList.add('correct');
+    // Función para verificar la respuesta
+    function checkAnswer(opcion) {
+        if (opcion === correctAnswer) {
             correctas++;
-            correctSound.play();  // Reproducir sonido de respuesta correcta
+            correctSound.play();
+            document.querySelector(`input[value="${opcion}"]`).parentNode.classList.add('correct');
         } else {
-            selectedLabel.classList.add('incorrect');
             incorrectas++;
-            incorrectSound.play();  // Reproducir sonido de respuesta incorrecta
+            incorrectSound.play();
+            document.querySelector(`input[value="${opcion}"]`).parentNode.classList.add('incorrect');
         }
 
-        // Actualizar estadísticas de respuestas
-        correctasEl.textContent = `Respuestas correctas: ${correctas}`;
-        incorrectasEl.textContent = `Respuestas incorrectas: ${incorrectas}`;
-        preguntasRespondidasEl.textContent = `Preguntas respondidas: ${currentQuestionIndex + 1} de ${preguntas.length}`;
-
-        setTimeout(() => {
-            if (currentQuestionIndex < preguntas.length - 1) {
-                currentQuestionIndex++;
-                mostrarPregunta();
-            } else {
-                mostrarResumen();
-            }
-        }, 1000);
+        currentQuestionIndex++;
+        updateStats();
+        setTimeout(showQuestion, 1000); // Esperar 1 segundo antes de mostrar la siguiente pregunta
     }
 
-    function mostrarResumen() {
-        const totalPreguntas = correctas + incorrectas;
-        const porcentajeCorrectas = ((correctas / totalPreguntas) * 100).toFixed(2);
-        const porcentajeIncorrectas = ((incorrectas / totalPreguntas) * 100).toFixed(2);
-
-        resultadoTexto.innerHTML = `
-            <strong>Resultados:</strong><br>
-            Preguntas correctas: ${correctas} (${porcentajeCorrectas}%)<br>
-            Preguntas incorrectas: ${incorrectas} (${porcentajeIncorrectas}%)
-        `;
-
-        resultModal.style.display = "block"; // Mostrar la ventana modal
+    // Función para actualizar estadísticas
+    function updateStats() {
+        preguntasRespondidasEl.innerText = `Preguntas respondidas: ${currentQuestionIndex} de ${preguntas.length}`;
+        correctasEl.innerText = `Respuestas correctas: ${correctas}`;
+        incorrectasEl.innerText = `Respuestas incorrectas: ${incorrectas}`;
     }
 
+    // Función para mostrar resultados
+    function showResults() {
+        resultModal.style.display = 'block';
+        resultadoTexto.innerText = `Has respondido ${correctas} preguntas correctamente de ${preguntas.length}.`;
+    }
+
+    // Cerrar modal
     closeModal.onclick = function() {
-        resultModal.style.display = "none";
+        resultModal.style.display = 'none';
     }
 
+    // Reiniciar test
     restartBtn.onclick = function() {
+        currentQuestionIndex = 0;
         correctas = 0;
         incorrectas = 0;
-        currentQuestionIndex = 0; // Reiniciar el índice de la pregunta actual
-        totalPreguntasEl.textContent = `Total de preguntas: 0`;
-        preguntasRespondidasEl.textContent = `Preguntas respondidas: 0 de 0`;
-        correctasEl.textContent = `Respuestas correctas: 0`;
-        incorrectasEl.textContent = `Respuestas incorrectas: 0`;
-        resultModal.style.display = "none";
-        inputFile.value = ''; // Limpiar el archivo cargado
-        preguntas = []; // Asegúrate de que el arreglo de preguntas esté vacío
-
-        // Limpiar contenedor de preguntas
-        document.getElementById('optionsContainer').innerHTML = '';
-        document.getElementById('questionText').textContent = '';
+        updateStats();
+        showQuestion();
+        resultModal.style.display = 'none';
     }
 
+    // Controlar tamaño de letra
+    fontSizeSlider.addEventListener('input', function() {
+        const fontSize = fontSizeSlider.value;
+        questionContainer.style.fontSize = `${fontSize}px`;
+    });
+
+    // Función para alternar pantalla completa
     function toggleFullscreen() {
         if (!document.fullscreenElement) {
             document.documentElement.requestFullscreen();
-            document.getElementById('fullscreenBtn').textContent = '✕';
         } else {
             if (document.exitFullscreen) {
                 document.exitFullscreen();
-                document.getElementById('fullscreenBtn').textContent = '⇱';
             }
         }
     }
-
-    fontSizeSlider.addEventListener('input', function() {
-        const newSize = fontSizeSlider.value + 'px';
-        questionContainer.style.fontSize = newSize;
-        document.querySelectorAll('.options label').forEach(label => {
-            label.style.fontSize = newSize;
-        });
-    });
 </script>
-
 </body>
 </html>
