@@ -94,6 +94,7 @@
             font-size: 1.5rem;
             font-weight: bold;
             margin-bottom: 20px;
+            text-align: justify;
         }
 
         .font-size-container {
@@ -193,19 +194,18 @@
             color: white;
         }
 
-        /* Media Queries para pantallas pequeñas */
         @media only screen and (max-width: 768px) {
             .sidebar {
-                display: none; /* Ocultar la barra lateral */
+                display: none;
             }
 
             .content {
-                margin-left: 0; /* Eliminar el margen de la izquierda */
-                width: 100%; /* Ocupa todo el ancho */
+                margin-left: 0;
+                width: 100%;
             }
 
             #showSidebarBtn {
-                display: block; /* Mostrar el botón para alternar la barra lateral */
+                display: block;
                 position: fixed;
                 top: 10px;
                 left: 10px;
@@ -374,6 +374,10 @@
         const selectedOption = event.target.value;
         const selectedLabel = event.target.parentElement;
 
+        // Buscar la respuesta correcta en las opciones
+        const opciones = document.querySelectorAll('.options label');
+
+        // Agregar clase correcta o incorrecta
         if (selectedOption === correctAnswer) {
             selectedLabel.classList.add('correct');
             correctas++;
@@ -382,6 +386,14 @@
             selectedLabel.classList.add('incorrect');
             incorrectas++;
             incorrectSound.play();
+
+            // Mostrar la opción correcta
+            opciones.forEach(option => {
+                const input = option.querySelector("input");
+                if (input.value === correctAnswer) {
+                    option.classList.add('correct');  // Resaltar la opción correcta
+                }
+            });
         }
 
         correctasEl.textContent = `Respuestas correctas: ${correctas}`;
@@ -417,15 +429,7 @@
     }
 
     restartBtn.onclick = function() {
-        correctas = 0;
-        incorrectas = 0;
-        currentQuestionIndex = 0;
-        totalPreguntasEl.textContent = `Total de preguntas: 0`;
-        preguntasRespondidasEl.textContent = `Preguntas respondidas: 0 de 0`;
-        correctasEl.textContent = `Respuestas correctas: 0`;
-        incorrectasEl.textContent = `Respuestas incorrectas: 0`;
-        resultModal.style.display = "none";
-        inputFile.value = '';
+        location.reload(); // Recargar la página para reiniciar el test y cargar nuevamente el archivo
     }
 
     function toggleFullscreen() {
