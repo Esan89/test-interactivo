@@ -1,8 +1,8 @@
 <!DOCTYPE html> 
 <html lang="es">
 <head>
+    <meta charset="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Banco de Preguntas</title>
     <style>
         body {
@@ -38,7 +38,6 @@
             align-items: flex-start;
             width: 100%;
             height: 100%;
-            transition: margin-left 0.3s ease;
         }
 
         .sidebar {
@@ -53,11 +52,11 @@
             left: 0;
             height: 100%;
             transition: transform 0.3s ease;
-            transform: translateX(-250px); /* Ocultar inicialmente */
+            transform: translateX(-250px);
         }
 
         .sidebar.show {
-            transform: translateX(0); /* Mostrar el menú */
+            transform: translateX(0);
         }
 
         .hover-area {
@@ -65,7 +64,7 @@
             top: 0;
             left: 0;
             height: 100%;
-            width: 20px; /* Ancho del área que detecta el mouse */
+            width: 20px;
             background-color: transparent;
             z-index: 1000;
         }
@@ -205,12 +204,15 @@
             color: white;
         }
 
-        /* Estilo para dispositivos móviles */
-        @media (max-width: 768px) {
-            .hover-area {
-                width: 40px; /* Área de hover más amplia en móviles */
-            }
+        /* Estilo para la lista de preguntas incorrectas */
+        .incorrect-item {
+            margin-bottom: 15px; /* Espacio entre preguntas */
         }
+
+        .incorrect-item strong {
+            font-weight: bold;
+        }
+
     </style>
 </head>
 <body>
@@ -219,7 +221,7 @@
     <h1 id="pageTitle">Bienvenido al Test Interactivo</h1>
 </header>
 
-<div class="hover-area"></div> <!-- Área para mostrar el menú -->
+<div class="hover-area"></div>
 
 <div class="container">
     <div class="sidebar" id="sidebar">
@@ -270,6 +272,8 @@
                 <td id="resultadoTexto"></td>
             </tr>
         </table>
+        <h3>Preguntas Incorrectas:</h3>
+        <ul id="preguntasIncorrectas"></ul> <!-- Lista para mostrar preguntas incorrectas -->
         <button id="restartBtn">Reiniciar Test</button>
     </div>
 </div>
@@ -281,6 +285,7 @@
     let correctAnswer = '';
     let correctas = 0;
     let incorrectas = 0;
+    let preguntasIncorrectas = []; // Almacenar las preguntas incorrectas
 
     const inputFile = document.getElementById('uploadExcel');
     const pageTitle = document.getElementById('pageTitle');
@@ -297,6 +302,7 @@
 
     const resultModal = document.getElementById('resultModal');
     const resultadoTexto = document.getElementById('resultadoTexto');
+    const preguntasIncorrectasEl = document.getElementById('preguntasIncorrectas');
     const closeModal = document.getElementById('closeModal');
     const restartBtn = document.getElementById('restartBtn');
 
@@ -370,6 +376,12 @@
             incorrectas++;
             incorrectSound.play();
 
+            // Guardar la pregunta incorrecta y su respuesta correcta
+            preguntasIncorrectas.push({
+                pregunta: preguntas[currentQuestionIndex].pregunta,
+                correcta: correctAnswer
+            });
+
             opciones.forEach(option => {
                 const input = option.querySelector("input");
                 if (input.value === correctAnswer) {
@@ -404,6 +416,16 @@
             Preguntas incorrectas: ${incorrectas} (${porcentajeIncorrectas}%)
         `;
 
+        preguntasIncorrectasEl.innerHTML = ''; // Limpiar el contenido previo
+
+        // Mostrar las preguntas incorrectas
+        preguntasIncorrectas.forEach(item => {
+            const li = document.createElement('li');
+            li.classList.add('incorrect-item');
+            li.innerHTML = `Pregunta: ${item.pregunta}<br>Respuesta correcta: <strong>${item.correcta}</strong>`;
+            preguntasIncorrectasEl.appendChild(li);
+        });
+
         resultModal.style.display = "block";
     }
 
@@ -412,7 +434,7 @@
     }
 
     restartBtn.onclick = function() {
-        location.reload();
+        location.reload(); // Recargar la página para reiniciar el test
     }
 
     fontSizeSlider.addEventListener('input', function() {
@@ -423,19 +445,17 @@
         });
     });
 
-    // Funcionalidad para mostrar y ocultar el menú lateral
     const sidebar = document.getElementById('sidebar');
     const hoverArea = document.querySelector('.hover-area');
 
     hoverArea.addEventListener('mouseover', function() {
-        sidebar.classList.add('show'); // Mostrar el menú cuando el mouse esté sobre la zona
+        sidebar.classList.add('show');
     });
 
     sidebar.addEventListener('mouseleave', function() {
-        sidebar.classList.remove('show'); // Ocultar el menú cuando el mouse salga del menú
+        sidebar.classList.remove('show');
     });
 
-    // Evento para dispositivos móviles (click en el área lateral)
     hoverArea.addEventListener('click', function() {
         if (sidebar.classList.contains('show')) {
             sidebar.classList.remove('show');
@@ -445,7 +465,7 @@
     });
 
     sidebar.addEventListener('click', function() {
-        sidebar.classList.remove('show'); // Ocultar el menú al hacer clic en el menú en móviles
+        sidebar.classList.remove('show');
     });
 </script>
 
