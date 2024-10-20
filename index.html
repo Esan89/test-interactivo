@@ -287,6 +287,7 @@
     let incorrectas = 0;
     let preguntasIncorrectas = []; // Almacenar las preguntas incorrectas
 
+    let startX = 0; // Posición inicial del toque
     const inputFile = document.getElementById('uploadExcel');
     const pageTitle = document.getElementById('pageTitle');
     const fontSizeSlider = document.getElementById('fontSize');
@@ -467,6 +468,31 @@
     sidebar.addEventListener('click', function() {
         sidebar.classList.remove('show');
     });
+
+    // Agregar soporte para gestos táctiles (swipe)
+    document.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+    });
+
+    document.addEventListener('touchend', function(e) {
+        const endX = e.changedTouches[0].clientX;
+        const deltaX = startX - endX;
+
+        if (deltaX > 50) {
+            // Swipe hacia la izquierda (ver pregunta anterior)
+            if (currentQuestionIndex > 0) {
+                currentQuestionIndex--;
+                mostrarPregunta();
+            }
+        } else if (deltaX < -50) {
+            // Swipe hacia la derecha (siguiente pregunta)
+            if (currentQuestionIndex < preguntas.length - 1) {
+                currentQuestionIndex++;
+                mostrarPregunta();
+            }
+        }
+    });
+
 </script>
 
 </body>
