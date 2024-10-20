@@ -32,13 +32,13 @@
         }
 
         .content {
-            margin-left: 250px;
             padding: 20px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
             width: 100%;
             height: 100%;
+            transition: margin-left 0.3s ease;
         }
 
         .sidebar {
@@ -52,11 +52,22 @@
             top: 0;
             left: 0;
             height: 100%;
+            transition: transform 0.3s ease;
+            transform: translateX(-250px); /* Ocultar inicialmente */
         }
 
-        .sidebar h2 {
-            color: white;
-            margin-bottom: 20px;
+        .sidebar.show {
+            transform: translateX(0); /* Mostrar el menú */
+        }
+
+        .hover-area {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 20px; /* Ancho del área que detecta el mouse */
+            background-color: transparent;
+            z-index: 1000;
         }
 
         #loadQuestions {
@@ -194,34 +205,10 @@
             color: white;
         }
 
-        @media only screen and (max-width: 768px) {
-            .sidebar {
-                display: none;
-            }
-
-            .content {
-                margin-left: 0;
-                width: 100%;
-            }
-
-            #showSidebarBtn {
-                display: block;
-                position: fixed;
-                top: 10px;
-                left: 10px;
-                background-color: #4CAF50;
-                color: white;
-                padding: 10px;
-                border: none;
-                border-radius: 5px;
-                cursor: pointer;
-                z-index: 1001;
-            }
-        }
-
-        @media only screen and (min-width: 769px) {
-            #showSidebarBtn {
-                display: none;
+        /* Estilo para dispositivos móviles */
+        @media (max-width: 768px) {
+            .hover-area {
+                width: 40px; /* Área de hover más amplia en móviles */
             }
         }
     </style>
@@ -232,7 +219,7 @@
     <h1 id="pageTitle">Bienvenido al Test Interactivo</h1>
 </header>
 
-<div id="showSidebarBtn" onclick="toggleSidebar()">☰ Mostrar Menú</div>
+<div class="hover-area"></div> <!-- Área para mostrar el menú -->
 
 <div class="container">
     <div class="sidebar" id="sidebar">
@@ -256,14 +243,12 @@
         </div>
     </div>
 
-    <div class="content">
+    <div class="content" id="content">
         <section id="cargar">
             <div class="question-container">
                 <p class="question-title" id="questionText"></p>
 
                 <div class="options" id="optionsContainer"></div>
-
-                <button id="fullscreenBtn" onclick="toggleFullscreen()">⇱</button>
             </div>
         </section>
     </div>
@@ -374,10 +359,8 @@
         const selectedOption = event.target.value;
         const selectedLabel = event.target.parentElement;
 
-        // Buscar la respuesta correcta en las opciones
         const opciones = document.querySelectorAll('.options label');
 
-        // Agregar clase correcta o incorrecta
         if (selectedOption === correctAnswer) {
             selectedLabel.classList.add('correct');
             correctas++;
@@ -387,11 +370,10 @@
             incorrectas++;
             incorrectSound.play();
 
-            // Mostrar la opción correcta
             opciones.forEach(option => {
                 const input = option.querySelector("input");
                 if (input.value === correctAnswer) {
-                    option.classList.add('correct');  // Resaltar la opción correcta
+                    option.classList.add('correct');
                 }
             });
         }
@@ -400,6 +382,7 @@
         incorrectasEl.textContent = `Respuestas incorrectas: ${incorrectas}`;
         preguntasRespondidasEl.textContent = `Preguntas respondidas: ${currentQuestionIndex + 1} de ${preguntas.length}`;
 
+        // Avanzar automáticamente a la siguiente pregunta después de un breve retraso
         setTimeout(() => {
             if (currentQuestionIndex < preguntas.length - 1) {
                 currentQuestionIndex++;
@@ -429,19 +412,7 @@
     }
 
     restartBtn.onclick = function() {
-        location.reload(); // Recargar la página para reiniciar el test y cargar nuevamente el archivo
-    }
-
-    function toggleFullscreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            document.getElementById('fullscreenBtn').textContent = '✕';
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-                document.getElementById('fullscreenBtn').textContent = '⇱';
-            }
-        }
+        location.reload();
     }
 
     fontSizeSlider.addEventListener('input', function() {
@@ -452,14 +423,30 @@
         });
     });
 
-    function toggleSidebar() {
-        const sidebar = document.getElementById("sidebar");
-        if (sidebar.style.display === "none") {
-            sidebar.style.display = "block";
+    // Funcionalidad para mostrar y ocultar el menú lateral
+    const sidebar = document.getElementById('sidebar');
+    const hoverArea = document.querySelector('.hover-area');
+
+    hoverArea.addEventListener('mouseover', function() {
+        sidebar.classList.add('show'); // Mostrar el menú cuando el mouse esté sobre la zona
+    });
+
+    sidebar.addEventListener('mouseleave', function() {
+        sidebar.classList.remove('show'); // Ocultar el menú cuando el mouse salga del menú
+    });
+
+    // Evento para dispositivos móviles (click en el área lateral)
+    hoverArea.addEventListener('click', function() {
+        if (sidebar.classList.contains('show')) {
+            sidebar.classList.remove('show');
         } else {
-            sidebar.style.display = "none";
+            sidebar.classList.add('show');
         }
-    }
+    });
+
+    sidebar.addEventListener('click', function() {
+        sidebar.classList.remove('show'); // Ocultar el menú al hacer clic en el menú en móviles
+    });
 </script>
 
 </body>
